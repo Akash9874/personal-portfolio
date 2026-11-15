@@ -3,6 +3,7 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { calm } from './calm.js';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -32,55 +33,35 @@ const onScroll = y => { nav.classList.toggle('nav--hidden', y > lastY && y > inn
 if (lenis) lenis.on('scroll', ({ scroll }) => onScroll(scroll));
 else addEventListener('scroll', () => onScroll(scrollY), { passive: true });
 
-/* ---------- loading the heavy parts only when they are needed ---------- */
-// Runs `run` once, when the element is within `margin` of the screen. Everything below the opening
-// (3D scenes, carousels) waits for this, so a visitor never pays for a section they have not reached.
-const near = (selector, margin, run) => {
-  const el = document.querySelector(selector);
-  if (!el) return;
-  const watch = new IntersectionObserver(entries => {
-    if (entries.some(entry => entry.isIntersecting)) { watch.disconnect(); run(); }
-  }, { rootMargin: margin });
-  watch.observe(el);
-};
-
 // The toolkit logos are a separate small download, fetched as soon as the page is up.
 import('./toolkit.js').then(({ renderToolkit }) => renderToolkit()).catch(err => console.warn('Toolkit logos unavailable', err));
 
 /* ---------- 3D scenes ---------- */
+// Every scene is built in small steps that only run while the page is still (see calm.js), compiles its shaders
+// in the background, and fades in when it is ready. Before this, building a section mid-scroll froze the page.
 const stages = {};
-const safely = (name, make) => { try { stages[name] = make(); } catch (err) { console.warn(`${name} scene unavailable`, err); } };
-
-// The opening is on screen straight away, so its scene loads first.
-import('./scenes/processor.js').then(({ createProcessor }) => {
-  safely('processor', () => createProcessor(document.getElementById('sceneProcessor'), [...document.querySelectorAll('#layers .layer')], { reduce }));
-  if (stages.processor) {
-    ScrollTrigger.create({ trigger: '#hero', start: 'top top', end: 'bottom bottom', onUpdate: self => { stages.processor.progress = self.progress; } });
-  }
-}).catch(err => console.warn('3D opening unavailable', err));
-
-// The block and the sand draw text, so they also wait for the fonts.
+const warn = what => err => console.warn(`${what} unavailable`, err);
 const fonts = Promise.all([document.fonts.load('600 46px Switzer'), document.fonts.load('600 200px Zodiak')]).catch(() => {});
-near('#toolkit', '120% 0px', () => {
-  Promise.all([import('./scenes/block.js'), fonts]).then(([{ createBlock }]) => {
-    safely('block', () => createBlock(document.getElementById('sceneBlock'), { reduce }));
-    if (stages.block) ScrollTrigger.create({ trigger: '#toolkit', start: 'top 35%', once: true, onEnter: () => stages.block.burst() });
-  }).catch(err => console.warn('Toolkit scene unavailable', err));
-});
-near('#contact', '120% 0px', () => {
-  Promise.all([import('./scenes/sand.js'), fonts]).then(([{ createSand }]) => {
-    safely('sand', () => createSand(document.getElementById('sceneSand'), { reduce }));
-  }).catch(err => console.warn('Footer scene unavailable', err));
-});
+
+// The opening is built first, before the page reveals itself, so nothing is animating while it builds.
+const opening = import('./scenes/processor.js')
+  .then(({ createProcessor }) => createProcessor(document.getElementById('sceneProcessor'), [...document.querySelectorAll('#layers .layer')], { reduce }))
+  .then(s => {
+    stages.processor = s;
+    const watch = ScrollTrigger.create({ trigger: '#hero', start: 'top top', end: 'bottom bottom', onUpdate: self => { s.progress = self.progress; } });
+    s.progress = watch.progress;
+  })
+  .catch(warn('3D opening'));
 
 /* ---------- Flex Carousel for the client sites and the GitHub projects ---------- */
 // It needs WebGL 2. Without it, both sections stay as the plain list that is already in the page.
-if (document.createElement('canvas').getContext('webgl2')) {
-  let chunk = null;
-  const load = () => chunk || (chunk = import('./carousels.jsx'));
+// The same spare context is used to compile the carousel's shaders ahead of time.
+const spare = document.createElement('canvas').getContext('webgl2');
+const carousels = [];
+if (spare) {
   const wire = (section, host, panelSelector, pick) => {
     const el = document.querySelector(section), panels = [...el.querySelectorAll(panelSelector)], wrap = panels[0].parentElement;
-    // The section switches to its carousel layout at once; the carousel itself arrives when the visitor gets close.
+    // The section switches to its carousel layout at once; the carousel itself mounts in a quiet moment.
     el.classList.add('has-carousel');
     let shown = -1;
     const show = p => {
@@ -99,26 +80,53 @@ if (document.createElement('canvas').getContext('webgl2')) {
       ScrollTrigger.refresh();
     };
     show(0); reserve();
-    let timer = 0;
-    addEventListener('resize', () => { clearTimeout(timer); timer = setTimeout(reserve, 200); });
-    document.fonts.ready.then(reserve);
-
-    near(section, '150% 0px', () => {
-      load().then(mod => {
-        const items = pick(mod);
-        mod.mountCarousel(document.querySelector(host), items, index => show(items[index].panel));
-      }).catch(err => {
-        // Fall back to the plain list.
-        console.warn('Carousel unavailable', err);
-        el.classList.remove('has-carousel'); wrap.style.minHeight = '';
-        panels.forEach(panel => panel.classList.remove('is-active'));
-        gsap.set(panels, { clearProps: 'all' });
-        ScrollTrigger.refresh();
-      });
+    // Only a change of width can change the write-ups' height. On phones the height changes whenever the
+    // address bar slides away mid-scroll, and measuring then caused a stutter.
+    let timer = 0, width = innerWidth;
+    addEventListener('resize', () => {
+      if (innerWidth === width) return;
+      width = innerWidth; clearTimeout(timer); timer = setTimeout(reserve, 200);
     });
+    fonts.then(reserve);
+
+    const fallBack = err => {
+      console.warn('Carousel unavailable', err);
+      el.classList.remove('has-carousel'); wrap.style.minHeight = '';
+      panels.forEach(panel => panel.classList.remove('is-active'));
+      gsap.set(panels, { clearProps: 'all' });
+      ScrollTrigger.refresh();
+    };
+    carousels.push({ host, pick, show, fallBack });
   };
   wire('#work', '#workCarousel', '.case', mod => mod.WORK);
   wire('#projects', '#projectCarousel', '.project', mod => mod.PROJECTS);
+}
+
+// Everything below the opening, built in page order once the opening has finished its entrance.
+async function buildTheRest() {
+  if (carousels.length) {
+    try {
+      const mod = await import('./carousels.jsx');
+      await mod.prewarm(spare);
+      for (const c of carousels) {
+        await calm();
+        try { const items = c.pick(mod); mod.mountCarousel(document.querySelector(c.host), items, index => c.show(items[index].panel)); }
+        catch (err) { c.fallBack(err); }
+      }
+    } catch (err) { carousels.forEach(c => c.fallBack(err)); }
+    spare.getExtension('WEBGL_lose_context')?.loseContext();
+  }
+  await fonts;
+  try {
+    const { createBlock } = await import('./scenes/block.js');
+    const block = await createBlock(document.getElementById('sceneBlock'), { reduce });
+    stages.block = block;
+    ScrollTrigger.create({ trigger: '#toolkit', start: 'top 35%', once: true, onEnter: () => block.burst() });
+  } catch (err) { warn('Toolkit scene')(err); }
+  try {
+    const { createSand } = await import('./scenes/sand.js');
+    stages.sand = await createSand(document.getElementById('sceneSand'), { reduce });
+  } catch (err) { warn('Footer scene')(err); }
 }
 
 gsap.ticker.add((time, deltaMs) => {
@@ -148,26 +156,20 @@ function reveals() {
 
 function intro() {
   const title = SplitText.create('#heroTitle', { type: 'lines', mask: 'lines', linesClass: 'ln' });
-  const tl = gsap.timeline({ defaults: { ease: 'expo.out' } });
-  tl.from(title.lines, { yPercent: 112, duration: 1.4, stagger: .1 }, .1)
+  return gsap.timeline({ defaults: { ease: 'expo.out' } })
+    .from(title.lines, { yPercent: 112, duration: 1.4, stagger: .1 }, .1)
     .from('.hero__kicker, .hero__lede, .hero__cta, .hero__scroll', { autoAlpha: 0, y: 24, duration: 1.1, stagger: .08 }, .45)
-    .from('#sceneProcessor', { autoAlpha: 0, duration: 1.6, ease: 'power2.out' }, .2)
     .from('#nav', { yPercent: -160, duration: 1.1 }, .6);
 }
 
 /* ---------- start ---------- */
-const start = () => {
+// The page shows itself once the fonts are in and the opening scene is built, or after 1.5 s at the latest.
+const atMost = ms => new Promise(resolve => setTimeout(resolve, ms));
+Promise.all([Promise.race([fonts, atMost(1500)]), Promise.race([opening, atMost(1500)])]).then(() => {
   root.classList.add('is-ready');
-  if (reduce) return;
-  intro(); reveals();
+  if (reduce) { ScrollTrigger.refresh(); buildTheRest(); return; }
+  const entrance = intro();
+  reveals();
   ScrollTrigger.refresh();
-};
-if (reduce) start();
-else {
-  const num = document.getElementById('loaderNum'), counter = { v: 0 };
-  gsap.to(counter, {
-    v: 100, duration: .8, ease: 'power2.inOut',
-    onUpdate: () => { num.textContent = Math.round(counter.v); },
-    onComplete: () => document.fonts.ready.then(start)
-  });
-}
+  entrance.then(buildTheRest);
+});

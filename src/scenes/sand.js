@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeStage } from './stage.js';
+import { makeStage, calm } from './stage.js';
 
 // The footer: grains of sand that gather into each phrase, hold, then drift into the next.
 const PHRASES = ['Have an idea?', 'Let’s build it.', 'Say hello.'];
@@ -30,30 +30,37 @@ void main(){
   #include <colorspace_fragment>
 }`;
 
-export function createSand(canvas, { reduce = false } = {}) {
+// Builds the footer in small steps, one per quiet moment, and returns once it is built.
+// `s.live` resolves when its shader has compiled and it is on screen.
+export async function createSand(canvas, { reduce = false } = {}) {
   const s = makeStage(canvas), { scene } = s;
   const N = s.small ? 26000 : 70000;
 
   const measure = document.createElement('canvas').getContext('2d'); measure.font = FONT(200);
   const size = Math.min(290, 200 * 1480 / Math.max(...PHRASES.map(p => measure.measureText(p).width)));
+  // Each phrase is drawn at half size and read back once; every lit pixel is a place a grain can land.
+  // Reading the half-size drawing is four times less work and gives the same grains as the full-size one did
+  // when it was read every second pixel.
   function sample(text, underline) {
-    const c = document.createElement('canvas'); c.width = 1600; c.height = 440;
+    const c = document.createElement('canvas'); c.width = 800; c.height = 220;
     const g = c.getContext('2d', { willReadFrequently: true });
-    g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = FONT(size); g.fillText(text, 800, 200);
-    if (underline) { const w = g.measureText(text).width; g.fillRect(800 - w / 2, 200 + size * .6, w, 14); }
-    const d = g.getImageData(0, 0, 1600, 440).data, pix = [];
-    for (let y = 0; y < 440; y += 2) for (let x = 0; x < 1600; x += 2) if (d[(y * 1600 + x) * 4 + 3] > 128) pix.push(x, y);
+    g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = FONT(size / 2); g.fillText(text, 400, 100);
+    if (underline) { const w = g.measureText(text).width; g.fillRect(400 - w / 2, 100 + size * .3, w, 7); }
+    const d = g.getImageData(0, 0, 800, 220).data, pix = [];
+    for (let y = 0; y < 220; y++) for (let x = 0; x < 800; x++) if (d[(y * 800 + x) * 4 + 3] > 128) pix.push(x, y);
     const out = new Float32Array(N * 3);
     if (!pix.length) return out;
     for (let i = 0; i < N; i++) {
       const k = Math.floor(Math.random() * pix.length / 2) * 2;
-      out[i * 3] = (pix[k] + Math.random() * 2 - 800) / 800;
-      out[i * 3 + 1] = -(pix[k + 1] + Math.random() * 2 - 220) / 800;
+      out[i * 3] = (pix[k] * 2 + Math.random() * 2 - 800) / 800;
+      out[i * 3 + 1] = -(pix[k + 1] * 2 + Math.random() * 2 - 220) / 800;
     }
     return out;
   }
-  const targets = PHRASES.map((p, i) => sample(p, i === PHRASES.length - 1));
+  const targets = [];
+  for (let i = 0; i < PHRASES.length; i++) { await calm(); targets.push(sample(PHRASES[i], i === PHRASES.length - 1)); }
 
+  await calm();
   const from = new Float32Array(N * 3), rnd = new Float32Array(N * 4);
   for (let i = 0; i < N; i++) {
     from[i * 3] = (Math.random() - .5) * 2.4; from[i * 3 + 1] = (Math.random() - .5) * .7;
@@ -94,5 +101,6 @@ export function createSand(canvas, { reduce = false } = {}) {
     U.uMouse.value.set((s.mx - U.uOff.value.x) / U.uScale.value.x, (s.my - U.uOff.value.y) / U.uScale.value.y);
   };
   s.fit();
+  s.live = s.goLive();
   return s;
 }

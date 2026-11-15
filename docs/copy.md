@@ -295,6 +295,6 @@ Away from the keyboard I watch a lot of films, read, play basketball and follow 
 
 ## Small print
 
-**Loading line:** Running checks…
+> The counting loader ("Running checks…") was removed on 2026-11-15 at your request. The page now opens straight into the headline.
 
 **Page not found:** This page failed its tests. · Button: Back to the start

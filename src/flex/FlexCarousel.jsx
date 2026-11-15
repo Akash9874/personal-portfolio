@@ -106,7 +106,7 @@ const easeInOut = value => {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
 
-const cardVertex = `#version 300 es
+export const cardVertex = `#version 300 es
 in vec3 position;
 in vec2 uv;
 uniform vec4 uRect;
@@ -121,7 +121,7 @@ void main() {
 }
 `;
 
-const cardFragment = `#version 300 es
+export const cardFragment = `#version 300 es
 precision highp float;
 uniform sampler2D tMap;
 uniform vec2 uSize;
@@ -159,14 +159,14 @@ void main() {
 }
 `;
 
-const lensVertex = `#version 300 es
+export const lensVertex = `#version 300 es
 in vec2 position;
 void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }
 `;
 
-const lensFragment = `#version 300 es
+export const lensFragment = `#version 300 es
 precision highp float;
 uniform sampler2D tScene;
 uniform vec2 uResolution;
@@ -281,6 +281,7 @@ const FlexCarousel = ({
   captureWheel = true,
   onChange,
   onSelect,
+  scheduleUpload,
   className = '',
   style
 }) => {
@@ -288,7 +289,7 @@ const FlexCarousel = ({
   const settingsRef = useRef(null);
   const itemsRef = useRef(items);
   const engineRef = useRef(null);
-  const callbacksRef = useRef({ onChange, onSelect });
+  const callbacksRef = useRef({ onChange, onSelect, scheduleUpload });
   const [active, setActive] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [focusOpen, setFocusOpen] = useState(false);
@@ -301,7 +302,7 @@ const FlexCarousel = ({
 
   useEffect(() => {
     itemsRef.current = list;
-    callbacksRef.current = { onChange, onSelect };
+    callbacksRef.current = { onChange, onSelect, scheduleUpload };
     settingsRef.current = {
       intro,
       cardHeight,
@@ -481,7 +482,9 @@ const FlexCarousel = ({
       const image = new Image();
       image.crossOrigin = 'anonymous';
       image.decoding = 'async';
-      image.onload = () => {
+      // Portfolio change: decode off the main thread first, then upload when `scheduleUpload` says so, so a batch
+      // of images arriving together cannot stall the page.
+      const settle = () => {
         if (!alive || !slots.includes(slot)) return;
         texture.image = image;
         texture.update();
@@ -509,6 +512,12 @@ const FlexCarousel = ({
         slot.loaded = true;
         dirty = true;
         start();
+      };
+      image.onload = () => {
+        if (!alive || !slots.includes(slot)) return;
+        const upload = () => { const schedule = callbacksRef.current.scheduleUpload; if (schedule) schedule(settle); else settle(); };
+        if (image.decode) image.decode().then(upload, upload);
+        else upload();
       };
       image.onerror = () => {
         if (!alive) return;

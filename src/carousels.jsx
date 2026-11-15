@@ -1,5 +1,33 @@
 import { createRoot } from 'react-dom/client';
-import FlexCarousel from './flex/FlexCarousel.jsx';
+import FlexCarousel, { cardVertex, cardFragment, lensVertex, lensFragment } from './flex/FlexCarousel.jsx';
+import { calm } from './calm.js';
+
+// Each image is uploaded in its own quiet moment. Eight arriving at once used to stall the page for 150 ms.
+const oneAtATime = upload => calm().then(upload);
+
+// The carousel compiles its shaders the moment it mounts, and that freezes the page (about 0.4 s on a first
+// visit). This compiles the same shaders ahead of time in a spare WebGL context, in the background, without
+// waiting on them. The browser keeps the compiled result, so the carousel gets it back almost at once.
+export function prewarm(gl) {
+  const parallel = gl && gl.getExtension('KHR_parallel_shader_compile');
+  if (!parallel) return Promise.resolve();
+  const programs = [[cardVertex, cardFragment], [lensVertex, lensFragment]].map(([vertex, fragment]) => {
+    const program = gl.createProgram();
+    for (const [type, source] of [[gl.VERTEX_SHADER, vertex], [gl.FRAGMENT_SHADER, fragment]]) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source); gl.compileShader(shader); gl.attachShader(program, shader);
+    }
+    gl.linkProgram(program);
+    return program;
+  });
+  return new Promise(resolve => {
+    const check = () => {
+      if (programs.every(p => gl.getProgramParameter(p, parallel.COMPLETION_STATUS_KHR))) resolve();
+      else setTimeout(check, 30);
+    };
+    check();
+  });
+}
 
 // The Flex Carousel from React Bits (src/flex), with its "liquid" preset.
 // captureWheel is off so the mouse wheel keeps scrolling the page; drag, arrow keys and clicks move the carousel.
@@ -19,6 +47,7 @@ export function mountCarousel(el, items, onChange) {
       autoplay={false}
       captureWheel={false}
       onChange={onChange}
+      scheduleUpload={oneAtATime}
     />
   );
 }

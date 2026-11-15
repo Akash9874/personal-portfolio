@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { makeStage, clamp, smooth, rng, radialTexture } from './stage.js';
+import { makeStage, calm, clamp, smooth, rng, radialTexture } from './stage.js';
 
 // The toolkit: a 3 x 3 x 3 block of clay tiles, each one a tool, around a glowing core.
 // It loosens as the pointer comes near and breaks apart on click.
@@ -8,41 +8,73 @@ const GLYPHS = ['{ }', '</>', '=>', '[ ]', '//', '&&', '( )', '::', '++', '#!', 
 const CLAYS = [['#B8643C', '#1E120B'], ['#A9573A', '#1E120B'], ['#C4744A', '#1E120B'], ['#B8643C', '#1E120B'], ['#C48A3A', '#1E120B'], ['#3A2619', '#F1E7D8']];
 const FONT = px => `600 ${px}px Switzer, system-ui, sans-serif`;
 
-export function createBlock(canvas, { reduce = false } = {}) {
+// Every tile face is drawn into one sheet of 8 x 7 tiles, so the block uploads a single texture, not 54.
+// Tiles are drawn at 256 units and stored at 192 pixels, which is still sharper than they ever appear.
+const CELL = 192, GRID = 8, ROWS = 7, SW = CELL * GRID, SH = CELL * ROWS, INSET = 3;
+
+// Builds the block in small steps, one per quiet moment, and returns once it is built.
+// `s.live` resolves when its shaders have compiled and it is on screen.
+export async function createBlock(canvas, { reduce = false } = {}) {
   const s = makeStage(canvas), { scene, camera, renderer } = s, R = rng(9);
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
   camera.fov = 32; camera.position.set(0, 1.7, 8.8); camera.lookAt(0, 0, 0);
   const g = new THREE.Group(); g.rotation.set(.22, .6, 0); scene.add(g);
 
+  await calm();
+  const sheet = document.createElement('canvas'); sheet.width = SW; sheet.height = SH;
+  const x = sheet.getContext('2d');
+  // One shared layer of clay grain, laid over every tile.
+  const grain = document.createElement('canvas'); grain.width = grain.height = 256;
+  { const n = grain.getContext('2d'), G = rng(77); for (let i = 0; i < 900; i++) { n.fillStyle = `rgba(0,0,0,${G() * .08})`; n.fillRect(G() * 256, G() * 256, 2, 2); } }
+  let used = 0;
+  const cell = draw => {
+    const c = used++;
+    x.save(); x.translate((c % GRID) * CELL, Math.floor(c / GRID) * CELL); x.scale(CELL / 256, CELL / 256); draw(); x.restore();
+    return c;
+  };
+  const INNER = cell(() => { x.fillStyle = '#1A110C'; x.fillRect(0, 0, 256, 256); });
+
   function face(text, glyph) {
-    const c = document.createElement('canvas'); c.width = c.height = 256;
-    const x = c.getContext('2d'), p = CLAYS[Math.floor(R() * CLAYS.length)];
-    x.fillStyle = p[0]; x.fillRect(0, 0, 256, 256);
-    for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(0,0,0,${R() * .08})`; x.fillRect(R() * 256, R() * 256, 2, 2); }
-    x.strokeStyle = p[1]; x.globalAlpha = .28; x.lineWidth = 3; x.strokeRect(14, 14, 228, 228);
-    x.globalAlpha = glyph ? .45 : 1; x.fillStyle = p[1]; x.textAlign = 'center'; x.textBaseline = 'middle';
-    const parts = (!glyph && text.includes(' ')) ? text.split(' ') : [text];
-    let fs = glyph ? 92 : 46; x.font = FONT(fs);
-    const w = Math.max(...parts.map(t => x.measureText(t).width));
-    if (w > 204) { fs = fs * 204 / w; x.font = FONT(fs); }
-    parts.forEach((t, i) => x.fillText(t, 128, 130 + (i - (parts.length - 1) / 2) * fs * 1.1));
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
-    return tex;
+    const p = CLAYS[Math.floor(R() * CLAYS.length)];
+    // Each tile used to draw its own grain with 2,700 random numbers. Skipping the same amount keeps every
+    // colour and every tile's flight path exactly as it was.
+    for (let n = 0; n < 2700; n++) R();
+    return cell(() => {
+      x.fillStyle = p[0]; x.fillRect(0, 0, 256, 256);
+      x.drawImage(grain, 0, 0);
+      x.strokeStyle = p[1]; x.globalAlpha = .28; x.lineWidth = 3; x.strokeRect(14, 14, 228, 228);
+      x.globalAlpha = glyph ? .45 : 1; x.fillStyle = p[1]; x.textAlign = 'center'; x.textBaseline = 'middle';
+      const parts = (!glyph && text.includes(' ')) ? text.split(' ') : [text];
+      let fs = glyph ? 92 : 46; x.font = FONT(fs);
+      const w = Math.max(...parts.map(t => x.measureText(t).width));
+      if (w > 204) { fs = fs * 204 / w; x.font = FONT(fs); }
+      parts.forEach((t, i) => x.fillText(t, 128, 130 + (i - (parts.length - 1) / 2) * fs * 1.1));
+    });
   }
 
-  const inner = new THREE.MeshStandardMaterial({ color: '#1A110C', roughness: .9 });
+  // A cube whose six faces show the given cells of the sheet.
+  const cube = cells => {
+    const geo = new THREE.BoxGeometry(.64, .64, .64), uv = geo.attributes.uv;
+    cells.forEach((c, f) => {
+      const u0 = ((c % GRID) * CELL + INSET) / SW, u1 = ((c % GRID + 1) * CELL - INSET) / SW;
+      const v1 = 1 - (Math.floor(c / GRID) * CELL + INSET) / SH, v0 = 1 - ((Math.floor(c / GRID) + 1) * CELL - INSET) / SH;
+      for (let k = f * 4; k < f * 4 + 4; k++) uv.setXY(k, u0 + uv.getX(k) * (u1 - u0), v0 + uv.getY(k) * (v1 - v0));
+    });
+    return geo;
+  };
+
+  const tiles = new THREE.CanvasTexture(sheet); tiles.colorSpace = THREE.SRGBColorSpace; tiles.anisotropy = 4;
+  const clay = new THREE.MeshStandardMaterial({ map: tiles, roughness: .82, metalness: 0 });
   const cubes = []; let li = 0, gi = 0, side = 0;
   for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) for (let k = -1; k <= 1; k++) {
     if (!i && !j && !k) continue;
-    const out = [i === 1, i === -1, j === 1, j === -1, k === 1, k === -1], mats = [];
+    const out = [i === 1, i === -1, j === 1, j === -1, k === 1, k === -1], cells = [];
     for (let f = 0; f < 6; f++) {
-      if (!out[f]) { mats.push(inner); continue; }
-      let tex;
-      if (f === 2 || f === 3) tex = face(GLYPHS[gi++ % GLYPHS.length], true);
-      else { tex = (side % 3 !== 2 && li < SKILLS.length) ? face(SKILLS[li++], false) : face(GLYPHS[gi++ % GLYPHS.length], true); side++; }
-      mats.push(new THREE.MeshStandardMaterial({ map: tex, roughness: .82, metalness: 0 }));
+      if (!out[f]) { cells.push(INNER); continue; }
+      if (f === 2 || f === 3) cells.push(face(GLYPHS[gi++ % GLYPHS.length], true));
+      else { cells.push((side % 3 !== 2 && li < SKILLS.length) ? face(SKILLS[li++], false) : face(GLYPHS[gi++ % GLYPHS.length], true)); side++; }
     }
-    const m = new THREE.Mesh(new THREE.BoxGeometry(.64, .64, .64), mats), p0 = new THREE.Vector3(i, j, k).multiplyScalar(.68);
+    const m = new THREE.Mesh(cube(cells), clay), p0 = new THREE.Vector3(i, j, k).multiplyScalar(.68);
     m.userData = {
       p0,
       dir: p0.clone().normalize().add(new THREE.Vector3(R() - .5, R() - .5, R() - .5).multiplyScalar(.5)).normalize(),
@@ -52,6 +84,7 @@ export function createBlock(canvas, { reduce = false } = {}) {
     g.add(m); cubes.push(m);
   }
 
+  await calm();
   scene.add(new THREE.HemisphereLight('#8A6248', '#140C08', 1));
   const key = new THREE.DirectionalLight('#FFE6C8', 2.8); key.position.set(-3.5, 4, 5); scene.add(key);
   const rim = new THREE.DirectionalLight('#FF7A33', 1.4); rim.position.set(4, 1.5, -4); scene.add(rim);
@@ -100,5 +133,6 @@ export function createBlock(canvas, { reduce = false } = {}) {
     eg.attributes.position.needsUpdate = true;
   };
   s.fit();
+  s.live = s.goLive([tiles, glow.material.map]);
   return s;
 }
