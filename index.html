@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akashdeep Dash — Full-stack &amp; AI engineer</title>
+  <meta name="description" content="Full-stack and AI engineer in Bangalore. Real-time apps, AI systems with guardrails, and client websites and booking systems in production, all built and tested honestly.">
+  <meta name="theme-color" content="#000000">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Akashdeep Dash — Full-stack &amp; AI engineer">
+  <meta property="og:description" content="Solid all the way down. Real-time apps, AI systems with guardrails, and client websites and booking systems in production.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="/fonts/Zodiak-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/Switzer-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/src/style.css">
+  <script>document.documentElement.classList.add('js')</script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"Akashdeep Dash","jobTitle":"Full-stack and AI engineer","address":{"@type":"PostalAddress","addressLocality":"Bangalore","addressCountry":"IN"},"sameAs":["https://github.com/Akash9874","https://linkedin.com/in/akashdeepdash"]}
+  </script>
+</head>
+<body>
+<a class="skip" href="#work">Skip to the work</a>
+
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader__in"><span class="loader__num" id="loaderNum">0</span><span class="loader__label">Running checks</span></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="nav__name" href="#top">Akashdeep Dash</a>
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#work">Work</a>
+    <a href="#projects">Projects</a>
+    <a href="#toolkit">Toolkit</a>
+    <a href="#research">Research</a>
+    <a href="#about">About</a>
+  </nav>
+  <a class="nav__cta" href="#contact">Say hello<span class="ico" aria-hidden="true">↗</span></a>
+</header>
+
+<main id="top">
+
+  <!-- Opening -->
+  <section class="hero" id="hero" aria-label="Opening">
+    <div class="hero__stick">
+      <canvas class="scene" id="sceneProcessor" aria-hidden="true"></canvas>
+      <div class="hero__copy">
+        <p class="hero__kicker">Akashdeep Dash, full-stack and AI engineer in Bangalore</p>
+        <h1 class="h1" id="heroTitle">Solid all the way down.</h1>
+        <p class="lead hero__lede">I build every layer myself, from the interface down to the model, and I test each one until it holds.</p>
+        <div class="hero__cta">
+          <a class="btn" href="#work">See the work<span class="btn__ico" aria-hidden="true">↓</span></a>
+          <a class="link" href="#contact">Say hello</a>
+        </div>
+      </div>
+      <ol class="layers" id="layers" aria-label="The layers of my stack, top to bottom">
+        <li class="layer"><b>Interface</b><span>React, Next.js, design</span></li>
+        <li class="layer"><b>Real-time</b><span>WebSockets, CRDT sync</span></li>
+        <li class="layer"><b>Services</b><span>Node.js, FastAPI</span></li>
+        <li class="layer"><b>Data</b><span>PostgreSQL, vector search</span></li>
+        <li class="layer"><b>Intelligence</b><span>Retrieval, guardrails, evaluation</span></li>
+        <li class="layer"><b>Tests</b><span>628 automated tests underneath</span></li>
+      </ol>
+      <p class="hero__scroll" aria-hidden="true">Scroll to pull it apart</p>
+    </div>
+  </section>
+
+  <!-- Act I -->
+  <section class="section" id="work">
+    <header class="section__head">
+      <p class="act"><span>Act I</span>Build</p>
+      <h2 class="h2" data-split>One agency. One developer. Three sites and the systems behind them.</h2>
+      <p class="lead" data-reveal>My first job was at Admirate, a creative agency. I was the only developer there, so there was nobody to hand the hard part to. I designed, built and shipped everything here myself, start to finish.</p>
+    </header>
+
+    <div class="carousel" id="workCarousel"></div>
+    <p class="carousel__hint">Drag to browse, or select a card for a closer look.</p>
+    <div class="cases">
+      <article class="case">
+        <a class="case__media" href="https://hopetrustindia.com" target="_blank" rel="noopener" aria-label="Open hopetrustindia.com">
+          <span class="bezel"><img src="/work/hope-trust.webp" alt="Hope Trust India home page: a calm sunset panel reading A place for hope, healing, and renewal" width="1422" height="900" loading="lazy"></span>
+        </a>
+        <div class="case__body">
+          <p class="case__meta">Mental health and de-addiction care in Hyderabad, since 2002.</p>
+          <h3 class="h3">Hope Trust India</h3>
+          <p class="case__what">People reach this site on a hard day, so it had to be calm, clear and quick to a booking.</p>
+          <ul class="tags"><li>Design</li><li>Website</li></ul>
+          <a class="link" href="https://hopetrustindia.com" target="_blank" rel="noopener">hopetrustindia.com</a>
+        </div>
+      </article>
+      <article class="case">
+        <a class="case__media" href="https://hopetrustindia.com" target="_blank" rel="noopener" aria-label="Open hopetrustindia.com">
+          <span class="bezel"><img src="/work/hope-assistant.webp" alt="The Hope Trust AI Assistant open on the Hope Trust website, greeting a visitor" width="1422" height="900" loading="lazy"></span>
+        </a>
+        <div class="case__body">
+          <p class="case__meta">The AI assistant on Hope Trust's website and WhatsApp, and the console their team works from.</p>
+          <h3 class="h3">Hope Trust assistant</h3>
+          <p class="case__what">A hello gets an answer straight away. The assistant says it's an AI and points anyone in danger to emergency services before anything else. It asks for a name and what's going on, suggests therapists who fit, and sends a link to book. Crisis messages, under-18s and requests for the coordinator are flagged to the team as they arrive, and every chat shows up on one console where staff can reply. The console pictured uses sample data, because the real one holds patient records.</p>
+          <ul class="tags"><li>Website chat</li><li>WhatsApp assistant</li><li>Intake console</li></ul>
+          <a class="link" href="https://hopetrustindia.com" target="_blank" rel="noopener">hopetrustindia.com</a>
+        </div>
+      </article>
+      <article class="case">
+        <a class="case__media" href="https://patilgroup.com" target="_blank" rel="noopener" aria-label="Open patilgroup.com">
+          <span class="bezel"><img src="/work/patil-group.webp" alt="Patil Group home page showing a high-speed train on a track" width="1422" height="900" loading="lazy"></span>
+        </a>
+        <div class="case__body">
+          <p class="case__meta">Railway sleepers and track systems for metro lines across India.</p>
+          <h3 class="h3">Patil Group</h3>
+          <p class="case__what">Fifty years of infrastructure work, six product lines and five track systems, organised so the projects speak first and nothing shouts.</p>
+          <ul class="tags"><li>Design</li><li>Website</li></ul>
+          <a class="link" href="https://patilgroup.com" target="_blank" rel="noopener">patilgroup.com</a>
+        </div>
+      </article>
+      <article class="case">
+        <a class="case__media" href="https://oursacredspace.in" target="_blank" rel="noopener" aria-label="Open oursacredspace.in">
+          <span class="bezel"><img src="/work/our-sacred-space.webp" alt="Our Sacred Space home page with dancers in rehearsal" width="1422" height="900" loading="lazy"></span>
+        </a>
+        <div class="case__body">
+          <p class="case__meta">A cultural and community centre in Secunderabad, founded in 2012, bringing together art, wellness, learning and environmental awareness.</p>
+          <h3 class="h3">Our Sacred Space</h3>
+          <p class="case__what">The place runs on its calendar: dance sessions, music events, workshops, markets. So events, classes and bookings sit at the front of the site, because that is what people come for.</p>
+          <ul class="tags"><li>Design</li><li>Website</li></ul>
+          <a class="link" href="https://oursacredspace.in" target="_blank" rel="noopener">oursacredspace.in</a>
+        </div>
+      </article>
+      <article class="case">
+        <a class="case__media" href="https://oursacredspace.in" target="_blank" rel="noopener" aria-label="Open oursacredspace.in">
+          <span class="bezel"><img src="/work/oss-dashboard.webp" alt="The Our Sacred Space admin dashboard, with booking totals and charts. Revenue is hidden." width="1700" height="938" loading="lazy"></span>
+        </a>
+        <div class="case__body">
+          <p class="case__meta">The booking system and admin portal behind Our Sacred Space.</p>
+          <h3 class="h3">Our Sacred Space bookings</h3>
+          <p class="case__what">Visitors book classes and events and request spaces on the site. The team runs all of it from one portal: every booking with its status, the classes and events on offer, co-working, and space requests waiting for review. Bookings can be searched by name, email, phone or ID, and filtered by type and status. Customer details and revenue are hidden in these screenshots.</p>
+          <ul class="tags"><li>Booking system</li><li>Admin portal</li><li>Dashboard</li></ul>
+          <a class="link" href="https://oursacredspace.in" target="_blank" rel="noopener">oursacredspace.in</a>
+        </div>
+      </article>
+    </div>
+
+    <p class="closing" data-reveal>Three organisations run on these today. That taught me to ship. It also made me curious about what happens when things go wrong.</p>
+  </section>
+
+  <!-- Act II -->
+  <section class="section" id="projects">
+    <header class="section__head">
+      <p class="act"><span>Act II</span>Break</p>
+      <h2 class="h2" data-split>Then I went looking for harder problems.</h2>
+      <p class="lead" data-reveal>Client work taught me to ship. My own projects are where I find out how things fail, and write the failures down.</p>
+    </header>
+
+    <div class="carousel" id="projectCarousel"></div>
+    <p class="carousel__hint">Drag to browse, or select a card for a closer look.</p>
+    <div class="project-panels">
+    <article class="project">
+      <header class="project__head">
+        <p class="project__n">Project 01</p>
+        <h3 class="h3">Collaborative Code Review Sandbox</h3>
+        <p class="lead">Edit code together, draw on it, run it. Nothing to install.</p>
+      </header>
+      <div class="project__grid">
+        <div class="project__story">
+          <div class="beat"><h4>The idea</h4><p>Code review lives in comment threads. The explaining happens on a whiteboard somewhere else. I wanted both in one browser tab.</p></div>
+          <div class="beat"><h4>What I built</h4><p>A shared workspace where several people edit the same files, sketch boxes and arrows straight over the code, and run it to see the same output at the same moment. Edits sync through a Yjs CRDT over WebSockets, so two people can work offline and still merge cleanly when they reconnect.</p></div>
+          <div class="beat"><h4>The hard part</h4><p>A drawing has to stay with the code it describes. Add ten lines above a function and the box around it moves down too. Delete the code and the drawing dims. It never slides onto something unrelated.</p></div>
+          <div class="beat"><h4>The decision I'd defend</h4><p>Syncing and running code are two separate services. One only relays edits and never looks inside them. The other validates, rate-limits and runs code in isolated containers.</p></div>
+        </div>
+        <aside class="project__side">
+          <dl class="stats">
+            <div><dt>unit and integration tests</dt><dd><span data-count="159">159</span></dd></div>
+            <div><dt>browser tests, including two browsers drawing over one document</dt><dd><span data-count="27">27</span></dd></div>
+            <div class="wide"><dt>languages run in isolated containers: Python, JavaScript, TypeScript</dt><dd><span data-count="3">3</span></dd></div>
+          </dl>
+          <div class="short"><h4>What it doesn't do yet</h4><p>The room link is the only lock, so anyone who has it can read and edit. Only the open file runs. It's a place to read code together, not a build system.</p></div>
+          <p class="stack">Next.js, TypeScript, Yjs, Monaco, Node.js, PostgreSQL, Piston, Vitest, Playwright</p>
+          <div class="project__links">
+            <a class="btn btn--ghost" href="https://github.com/Akash9874/Multimodal-Collaborative-Code-Review-Sandbox" target="_blank" rel="noopener">Code on GitHub<span class="btn__ico" aria-hidden="true">↗</span></a>
+            <a class="link" href="https://magnificent-torrone-9ce153.netlify.app/" target="_blank" rel="noopener">Live demo</a>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <article class="project">
+      <header class="project__head">
+        <p class="project__n">Project 02</p>
+        <h3 class="h3">Enterprise RAG with Guardrails &amp; Evaluation</h3>
+        <p class="lead">An AI assistant you can attack, measure and trust, built on a laptop with no GPU.</p>
+      </header>
+      <div class="project__grid">
+        <div class="project__story">
+          <div class="beat"><h4>The constraint</h4><p>One rule from the start: no usable GPU, 16 GB of RAM, and no budget for paid inference.</p></div>
+          <div class="beat"><h4>What I built</h4><p>A question-answering service where every request passes through a chain of safety checks, cheapest first. Pattern and personal-data checks take under a millisecond. Small classifier models run next. A language model is only called when the cheaper checks can't decide.</p></div>
+          <div class="beat"><h4>How I know it works</h4><p>I attacked it. 22 attacks, plus 12 harmless questions as a control group.</p></div>
+          <div class="beat"><h4>The part I'm proudest of</h4><p>Scoring uses no AI judge, so the same commit gives the same score on my laptop and in CI. When I planted a regression on purpose, recall dropped from 0.661 to 0.464 and the build failed, as designed.</p></div>
+        </div>
+        <aside class="project__side">
+          <dl class="stats">
+            <div><dt>to stop a prompt injection</dt><dd><span data-count="0.92">0.92</span><small>ms</small></dd></div>
+            <div><dt>injection attacks got through</dt><dd>0<small>of 8</small></dd></div>
+            <div><dt>personal-data attacks got through</dt><dd>0<small>of 4</small></dd></div>
+            <div><dt>harmless questions wrongly refused</dt><dd>0<small>of 12</small></dd></div>
+          </dl>
+          <div class="short"><h4>Where it falls short</h4><p>5 of the 22 attacks succeeded, and 4 of those were unanswerable questions it hedged on when it should have refused. Answers take 34.6 seconds against a 20-second target. 57% of answers cite no source. Each of these is written up in the repo with what it would cost to fix.</p></div>
+          <p class="stack">442 tests, 30 written decision records, and the whole stack healthy in 21.4 seconds from one Docker command.</p>
+          <p class="stack">Python, FastAPI, Qdrant, Ollama, Qwen2.5-3B, Docker</p>
+          <div class="project__links">
+            <a class="btn btn--ghost" href="https://github.com/Akash9874/Enterprise-RAG-with-Guardrails-Evaluation" target="_blank" rel="noopener">Code on GitHub<span class="btn__ico" aria-hidden="true">↗</span></a>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <article class="project">
+      <header class="project__head">
+        <p class="project__n">Project 03</p>
+        <h3 class="h3">Focus Timer</h3>
+        <p class="lead">A gentle daily time budget for distracting sites. A Chrome extension with no dependencies.</p>
+      </header>
+      <div class="project__grid">
+        <div class="project__story">
+          <div class="beat"><h4>The idea</h4><p>Blocking a site outright is all or nothing. This gives it a daily allowance instead. A small countdown pill shows what's left, and when the allowance runs out the page blurs behind a reminder.</p></div>
+          <div class="beat"><h4>The detail I like</h4><p>You can borrow five minutes, but it's a loan and not a reset: tomorrow starts five minutes shorter.</p></div>
+          <div class="beat"><h4>The hard part</h4><p>Chrome shuts down an extension's background worker after about 30 seconds idle, so a running counter would quietly lose time. Time is worked out from saved timestamps instead, and each save is capped at 90 seconds so a sleeping laptop can't add phantom hours.</p></div>
+          <div class="beat"><h4>Only when you're there</h4><p>The clock pauses when you switch tabs, leave the window, or stop touching the keyboard for 60 seconds.</p></div>
+        </div>
+        <aside class="project__side">
+          <dl class="stats">
+            <div><dt>tests, with no browser automation</dt><dd><span data-count="39">39</span></dd></div>
+            <div><dt>network requests. Everything stays on your machine.</dt><dd>0</dd></div>
+          </dl>
+          <div class="short"><h4>What it doesn't do yet</h4><p>It isn't on the Chrome Web Store, so it installs unpacked in developer mode.</p></div>
+          <p class="stack">Chrome Manifest V3, JavaScript, chrome.storage, Vitest</p>
+          <div class="project__links">
+            <a class="btn btn--ghost" href="https://github.com/Akash9874/Focus-Timer-Chrome-extension" target="_blank" rel="noopener">Code on GitHub<span class="btn__ico" aria-hidden="true">↗</span></a>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    <article class="project">
+      <header class="project__head">
+        <p class="project__n">Project 04</p>
+        <h3 class="h3">QuickMart</h3>
+        <p class="lead">Compare the price of the same groceries across stores, and see the best deal.</p>
+      </header>
+      <div class="project__grid">
+        <div class="project__story">
+          <div class="beat"><h4>The idea</h4><p>One place to compare what the same item costs at several quick-commerce stores, with the cheapest one marked and the saving worked out.</p></div>
+          <div class="beat"><h4>What I built</h4><p>A Next.js app on PostgreSQL with Prisma. You browse by category or search, each product lists its price at every store, the lowest is highlighted, and the saving shows as a percentage. Accounts, a cart and orders run through the app's own API routes.</p></div>
+        </div>
+        <aside class="project__side">
+          <div class="short"><h4>What it doesn't do yet</h4><p>The stores and prices are sample data seeded into the database, not live feeds from real retailers.</p></div>
+          <p class="stack">Next.js, React, TypeScript, Tailwind CSS, PostgreSQL, Prisma</p>
+          <div class="project__links">
+            <a class="btn btn--ghost" href="https://github.com/Akash9874/QuickMart-Qcommerce-Website" target="_blank" rel="noopener">Code on GitHub<span class="btn__ico" aria-hidden="true">↗</span></a>
+            <a class="link" href="https://quickmart-theta.vercel.app" target="_blank" rel="noopener">Live site</a>
+          </div>
+        </aside>
+      </div>
+    </article>
+    </div>
+  </section>
+
+  <!-- Toolkit -->
+  <section class="kit" id="toolkit">
+    <canvas class="scene" id="sceneBlock" aria-hidden="true"></canvas>
+    <div class="kit__copy">
+      <h2 class="h2" data-split>What I reach for</h2>
+      <p class="lead" data-reveal>Everything I build comes out of this block. <span class="hover-only">Bring your cursor close and it loosens. Click and it comes apart.</span><span class="touch-only">Tap it and it comes apart.</span></p>
+      <dl class="kit__list" data-reveal>
+        <div><dt>Build</dt><dd data-tools="build">TypeScript, React, Next.js, Node.js, Express, PostgreSQL, Tailwind CSS</dd></div>
+        <div><dt>AI</dt><dd data-tools="ai">Python, FastAPI, retrieval (RAG), Qdrant, Ollama, scikit-learn</dd></div>
+        <div><dt>Ship and test</dt><dd data-tools="ship">Docker, AWS, GitHub Actions, Vitest, Playwright, Netlify</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- Act III -->
+  <section class="section" id="research">
+    <header class="section__head">
+      <p class="act"><span>Act III</span>Prove</p>
+      <h2 class="h2" data-split>If it's true, it should survive review.</h2>
+    </header>
+
+    <article class="paper" data-reveal>
+      <div class="paper__in">
+        <p class="paper__venue">2026 9th International Conference on Intelligent Computing and Control Systems (ICICCS), IEEE Xplore, pages 1239–1245</p>
+        <h3 class="h3">Federated Learning for Privacy Preservation of IoT Device</h3>
+        <p class="paper__authors">First author, with Sai Suraj Voleti, Adithya P and Jasmine S.</p>
+        <div class="paper__cols">
+          <div class="beat"><h4>The problem, plainly</h4><p>Phones and sensors can train a shared model without their data ever leaving the device. The trouble is real devices. Some are slow, some are low on battery, some drop offline halfway through. Waiting for all of them stalls everyone.</p></div>
+          <div class="beat"><h4>What we designed</h4><p>An asynchronous approach. The server takes updates as they arrive and gives late ones less weight. It chooses which devices to train on, and devices low on battery do less work each round. Each update gets noise added on the device for differential privacy, then is compressed to save bandwidth.</p></div>
+          <div class="beat"><h4>Result</h4><p>Tested on human-activity sensor data, with each device holding a different mix of data, it reached accuracy comparable to centralized training and outperformed synchronous federated learning when the devices were uneven.</p></div>
+        </div>
+        <a class="btn" href="https://ieeexplore.ieee.org/document/11503005" target="_blank" rel="noopener">Read on IEEE Xplore<span class="btn__ico" aria-hidden="true">↗</span></a>
+      </div>
+    </article>
+  </section>
+
+  <!-- Experience -->
+  <section class="section" id="experience">
+    <header class="section__head">
+      <h2 class="h2" data-split>Where I've worked</h2>
+    </header>
+    <div class="jobs">
+      <article class="job job--now" data-reveal>
+        <div class="job__in" data-year="2026">
+          <p class="job__top"><span class="job__now">Now</span><span>Since Oct 2026</span></p>
+          <h3>Cybersecurity Analyst</h3>
+          <p class="job__org">KPMG India, Bangalore</p>
+          <p class="job__what">Information security and technology risk assessment.</p>
+          <ul class="tags"><li>Information security</li><li>Technology risk assessment</li></ul>
+        </div>
+      </article>
+      <article class="job" data-reveal>
+        <div class="job__in" data-year="2025">
+          <p class="job__top"><span>Internship</span><span>Sep 2025 to Jan 2026</span></p>
+          <h3>Full-stack Developer Intern</h3>
+          <p class="job__org">Admirate, remote</p>
+          <p class="job__what">The agency's only developer. Designed, built and deployed every client site and system in Act I.</p>
+          <ul class="tags"><li>React</li><li>Next.js</li><li>Node.js</li><li>PostgreSQL</li></ul>
+        </div>
+      </article>
+    </div>
+    <p class="edu" data-reveal><span><b>B.Tech in Computer Science</b>, Cloud Computing</span><span>SRM Institute of Science and Technology, 2026</span></p>
+  </section>
+
+  <!-- About -->
+  <section class="section about" id="about">
+    <h2 class="h2" data-split>The short version</h2>
+    <div class="about__text">
+      <p class="about__big" data-reveal>I'm Akashdeep. I'm 22 and I live in Bangalore.</p>
+      <p data-reveal>I started out as the only developer at a creative agency, which is a quick way to learn that every part of a product is your problem. Now I work in cybersecurity at KPMG India, and my own hours go to full-stack and AI engineering: real-time systems, retrieval, guardrails, and the tests that show whether any of it works.</p>
+      <p data-reveal>I like projects where the README can include the numbers that didn't go my way.</p>
+      <p data-reveal>Away from the keyboard I watch a lot of films, read, play basketball and follow football.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- Contact -->
+<footer class="foot" id="contact">
+  <canvas class="scene" id="sceneSand" aria-hidden="true"></canvas>
+  <h2 class="vh">Have something that needs to hold up?</h2>
+  <div class="foot__copy">
+    <p class="lead">If you're building in full-stack or AI and want someone who will ship it and tell you honestly how it tests, write to me.</p>
+    <div class="foot__cta">
+      <a class="btn" href="mailto:akashdeepdash@gmail.com">akashdeepdash@gmail.com<span class="btn__ico" aria-hidden="true">↗</span></a>
+      <a class="link" href="https://linkedin.com/in/akashdeepdash" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="link" href="https://github.com/Akash9874" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+  <div class="foot__end"><span>Designed and built by Akashdeep Dash</span><span>Bangalore, 2026</span></div>
+</footer>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

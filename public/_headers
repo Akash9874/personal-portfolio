@@ -1,0 +1,12 @@
+# Caching rules for Netlify. This copy travels inside the build folder, so it also works for a drag-and-drop deploy.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/work/*
+  Cache-Control: public, max-age=86400
+
+/projects/*
+  Cache-Control: public, max-age=86400
